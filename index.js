@@ -20,6 +20,7 @@ function randomIdent() {
 module.exports = function(content) {
     this.cacheable && this.cacheable();
     var query = loaderUtils.parseQuery(this.query);
+    var forceAbsolute = query.forceAbsolute;
     var attributes = ["ng-include", "ng-inline"];
     if(query.attrs !== undefined) {
         if(typeof query.attrs === "string")
@@ -41,10 +42,12 @@ module.exports = function(content) {
     links.forEach(function(link) {
         var value = link.value;
         if(link.value && link.value[0] == "'" && link.value[link.value.length-1] == "'"){
-            link.value = link.value.slice(1, link.value.length-2);
+            link.value = link.value.slice(1, link.value.length-1);
         }
-        if(!loaderUtils.isUrlRequest(link.value, root)) return;
-        
+        if(link.value && link.value[0] != '/' && forceAbsolute){
+            link.value = '/' + link.value;
+        }
+
         do {
             var ident = randomIdent();
         } while(data[ident]);
