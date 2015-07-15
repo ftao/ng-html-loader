@@ -1,0 +1,28 @@
+{
+  "name": "ng-html-loader",
+  "version": "1.0.0",
+  "description": "angular html template loader for webpack, handle embed ng-include / ng-inline",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "fastparse": "^1.0.0",
+    "loader-utils": "~0.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ftao/ng-html-loader.git"
+  },
+  "keywords": [
+    "webpack",
+    "angular",
+    "html"
+  ],
+  "author": "Tao Fei",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ftao/ng-html-loader/issues"
+  },
+  "homepage": "https://github.com/ftao/ng-html-loader"
+}
