@@ -21,25 +21,36 @@ module.exports = function(content) {
     this.cacheable && this.cacheable();
     var query = loaderUtils.parseQuery(this.query);
     var forceAbsolute = query.forceAbsolute;
-    var attributes = ["ng-include", "ng-inline"];
+    var attributes = ["ng-include", "ng-inline", "img:src"];
+    var embedAttrs = ["ng-include", "ng-inline"];
     if(query.attrs !== undefined) {
-        if(typeof query.attrs === "string")
+        if(typeof query.attrs === "string"){
             attributes = query.attrs.split(" ");
-        else if(Array.isArray(query.attrs))
+        } else if(Array.isArray(query.attrs)){
             attributes = query.attrs;
-        else if(query.attrs === false)
+        } else if(query.attrs === false){
             attributes = [];
-        else
+        } else {
             throw new Error("Invalid value to query parameter attrs");
+        }
     }
     var root = query.root;
     var links = attrParse(content, function(tag, attr) {
-        return attributes.indexOf(attr) >= 0;
+        if(attributes.indexOf(tag + ":" + attr) >= 0){
+            return true;
+        }
+        if(attributes.indexOf(attr) >= 0){
+            return true;
+        }
+        return false;
     });
     links.reverse();
     var data = {};
     content = [content];
     links.forEach(function(link) {
+        if(!loaderUtils.isUrlRequest(link.value, root)) {
+            return;
+        }
         var value = link.value;
         if(link.value && link.value[0] == "'" && link.value[link.value.length-1] == "'"){
             link.value = link.value.slice(1, link.value.length-1);
@@ -53,17 +64,23 @@ module.exports = function(content) {
         } while(data[ident]);
         data[ident] = link.value;
         var x = content.pop();
-        content.push(x.substr(link.endAt));
-        if(link.close){
-            content.push("</" + link.tagName + ">");
-            content.push(ident);
-            content.push(">");
-            content.push(x.slice(link.attrStart + link.attrLength, link.endAt-2));
+        if(embedAttrs.indexOf(link.attrName) >= 0){
+            content.push(x.substr(link.endAt));
+            if(link.close){
+                content.push("</" + link.tagName + ">");
+                content.push(ident);
+                content.push(">");
+                content.push(x.slice(link.attrStart + link.attrLength, link.endAt-2));
+            } else {
+                content.push(ident);
+                content.push(x.slice(link.attrStart + link.attrLength, link.endAt));
+            }
+            content.push(x.substr(0, link.attrStart));
         } else {
+            content.push(x.substr(link.valueStart + link.valueLength));
             content.push(ident);
-            content.push(x.slice(link.attrStart + link.attrLength, link.endAt));
+            content.push(x.substr(0, link.valueStart));
         }
-        content.push(x.substr(0, link.attrStart));
     });
     content.reverse();
     content = content.join("");
