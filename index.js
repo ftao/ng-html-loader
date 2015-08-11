@@ -48,9 +48,13 @@ module.exports = function(content) {
     var data = {};
     content = [content];
     links.forEach(function(link) {
-        if(!loaderUtils.isUrlRequest(link.value, root)) {
-            return;
+        //not ng-include / ng-inline
+        if(embedAttrs.indexOf(link.attrName) < 0){
+            if(!loaderUtils.isUrlRequest(link.value, root)) {
+                return;
+            }
         }
+
         var value = link.value;
         if(link.value && link.value[0] == "'" && link.value[link.value.length-1] == "'"){
             link.value = link.value.slice(1, link.value.length-1);
