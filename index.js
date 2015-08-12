@@ -16,11 +16,21 @@ function randomIdent() {
     return "xxxNGINCLUDExxx" + Math.random() + Math.random() + "xxx";
 };
 
+function getHighResolutionURL(url) {
+    var infix = '@2x';
+    var parts = url.split('.');
+    if (parts.length < 2){
+        return url; 
+    }
+    parts[parts.length - 2] += infix;
+    return parts.join('.');
+}
 
 module.exports = function(content) {
     this.cacheable && this.cacheable();
     var query = loaderUtils.parseQuery(this.query);
     var forceAbsolute = query.forceAbsolute;
+    var checkRetina = query.checkRetina;
     var attributes = ["ng-include", "ng-inline", "img:src"];
     var embedAttrs = ["ng-include", "ng-inline"];
     if(query.attrs !== undefined) {
@@ -81,7 +91,21 @@ module.exports = function(content) {
             }
             content.push(x.substr(0, link.attrStart));
         } else {
-            content.push(x.substr(link.valueStart + link.valueLength));
+            var linkValueNext = link.valueStart + link.valueLength + 1;
+            content.push(x.substr(linkValueNext));
+            if(checkRetina){
+                var hrUrl = getHighResolutionURL(link.value);
+                if(loaderUtils.isUrlRequest(hrUrl, root)){
+                    do {
+                        var ident2 = randomIdent();
+                    } while(data[ident2]);
+                    data[ident2] = hrUrl;
+                    content.push('"');
+                    content.push(ident2);
+                    content.push(' data-at2x="');
+                }
+            }
+            content.push(x.substr(linkValueNext-1, 1))
             content.push(ident);
             content.push(x.substr(0, link.valueStart));
         }
