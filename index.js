@@ -31,6 +31,17 @@ module.exports = function(content) {
     var query = loaderUtils.parseQuery(this.query);
     var forceAbsolute = query.forceAbsolute;
     var checkRetina = query.checkRetina;
+    var noRetinaSuffix = {
+        'svg' : true
+    }
+    function requireRetina(path){
+        var parts = path.split('.');
+        if(parts.length >= 2){
+            var suffix = parts[parts.length-1];
+            return !(noRetinaSuffix[suffix] === true);
+        }
+        return true;
+    }
     var attributes = ["ng-include", "ng-inline", "img:src"];
     var embedAttrs = ["ng-include", "ng-inline"];
     if(query.attrs !== undefined) {
@@ -93,7 +104,7 @@ module.exports = function(content) {
         } else {
             var linkValueNext = link.valueStart + link.valueLength + 1;
             content.push(x.substr(linkValueNext));
-            if(checkRetina){
+            if(checkRetina && requireRetina(link.value)){
                 var hrUrl = getHighResolutionURL(link.value);
                 if(loaderUtils.isUrlRequest(hrUrl, root)){
                     do {
